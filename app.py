@@ -6,6 +6,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 import pandas as pd
 import ast
+import pytz
 
 from helper.aqi_ip_sample import create_aqi_input_sample
 from helper.predict_aqi import predict_aqi
@@ -17,8 +18,8 @@ def find_aqi(state, city, station_id, station_name):
     # from_date : previous date, time: 1hr before
     # to_date: current date, time: 2hrs before
 
-    from_date = str((datetime.now().replace(second=0,minute=0) - timedelta(days=1, hours=1,)).strftime("%d-%m-%Y T%H:%M:%SZ"))
-    to_date = str((datetime.now().replace(second=0,minute=0) - timedelta(hours=2)).strftime("%d-%m-%Y T%H:%M:%SZ"))
+    from_date = (datetime.now(pytz.timezone('Asia/Kolkata')).replace(second=0,minute=0) - timedelta(days=1, hours=1)).strftime("%d-%m-%Y T%H:%M:%SZ")
+    to_date = (datetime.now(pytz.timezone('Asia/Kolkata')).replace(second=0,minute=0) - timedelta(hours=2)).strftime("%d-%m-%Y T%H:%M:%SZ")
 
     # print(from_date, to_date, sep='\n')
 
@@ -143,7 +144,7 @@ def app():
                 pm25 = {}; pm10 = {}; NO2 = {}; NH3 = {}; SO2 = {}; CO = {}; Ozone = {}
                 i = 1
                 while i>=(2-len(aqi)):
-                    time_list.append(str((datetime.now().replace(second=0,minute=0) - timedelta(hours=i)).strftime("%d-%m-%Y %H:%M:%S")))    
+                    time_list.append((datetime.now(pytz.timezone('Asia/Kolkata')).replace(second=0,minute=0) - timedelta(hours=i)).strftime("%d-%m-%Y %H:%M:%S"))    
                     i-=1
 
                 for i in range(len(time_list)):
