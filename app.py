@@ -17,8 +17,8 @@ def find_aqi(state, city, station_id, station_name):
     # from_date : previous date, time: 1hr before
     # to_date: current date, time: 2hrs before
 
-    from_date = (datetime.now().replace(second=0,minute=0) - timedelta(days=1, hours=1,)).strftime("%d-%m-%Y T%H:%M:%SZ")
-    to_date = (datetime.now().replace(second=0,minute=0) - timedelta(hours=2)).strftime("%d-%m-%Y T%H:%M:%SZ")
+    from_date = str((datetime.now().replace(second=0,minute=0) - timedelta(days=1, hours=1,)).strftime("%d-%m-%Y T%H:%M:%SZ"))
+    to_date = str((datetime.now().replace(second=0,minute=0) - timedelta(hours=2)).strftime("%d-%m-%Y T%H:%M:%SZ"))
 
     # print(from_date, to_date, sep='\n')
 
@@ -143,7 +143,7 @@ def app():
                 pm25 = {}; pm10 = {}; NO2 = {}; NH3 = {}; SO2 = {}; CO = {}; Ozone = {}
                 i = 1
                 while i>=(2-len(aqi)):
-                    time_list.append((datetime.now().replace(second=0,minute=0) - timedelta(hours=i)).strftime("%d-%m-%Y %H:%M:%S"))    
+                    time_list.append(str((datetime.now().replace(second=0,minute=0) - timedelta(hours=i)).strftime("%d-%m-%Y %H:%M:%S")))    
                     i-=1
 
                 for i in range(len(time_list)):
@@ -175,7 +175,7 @@ def app():
                 if 101 < aqi[1] < 200:
                     aqi_remark = 'Moderate'
                 if 201 < aqi[1] < 300:
-                    aqi_remark = ':Poor'
+                    aqi_remark = 'Poor'
                 if 301 < aqi[1] < 400:
                     aqi_remark = 'Very poor'
                 if 401 < aqi[1] < 500:
