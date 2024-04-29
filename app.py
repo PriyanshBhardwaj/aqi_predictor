@@ -35,15 +35,23 @@ def find_aqi(state, city, station_id, station_name):
         return errorMsg, status, None
 
     # print(aqi_input)
-    # print(pollutants_data_list)
+    pollutants_list = pollutants_data_list.copy()
+    # print(pollutants_list[0])
+
     ## predicting aqi
     predicted_aqi, polls = predict_aqi(aqi_input, pollutants_data_list)
     status = True
 
+    # print(polls[0])
+
+    for i in range(len(pollutants_list)):
+        pollutants_list[i] = pollutants_list[i]+polls[i]
+        # print()
+
     # aqi: curr-1, curr, curr+1, +2, +3, +4, +5, +6
     # print(predicted_aqi)
 
-    return predicted_aqi, status, polls
+    return predicted_aqi, status, pollutants_list
 
 # find_aqi()
 
@@ -145,7 +153,7 @@ def app():
             with st.spinner(''):
 
                 ##calling aqi function
-                aqi, status, polls = find_aqi(state, city, station_id, station)
+                aqi, status, pollutants_list = find_aqi(state, city, station_id, station)
             # print(aqi)
 
             if status == False:
@@ -153,6 +161,13 @@ def app():
                 st.write(f'**{aqi}**')
 
             else:
+                polls_ploting_time_list = []
+                j=25
+                while j >=-6:
+                    polls_ploting_time_list.append((datetime.now(pytz.timezone('Asia/Kolkata')).replace(second=0,minute=0) - timedelta(hours=j)).strftime("%d-%m-%Y %H:%M:%S"))
+                    j-=1
+                # print(len(polls_ploting_time_list))
+
                 time_list = []
                 aqi_time = {}
                 pm25 = {}; pm10 = {}; NO2 = {}; NH3 = {}; SO2 = {}; CO = {}; Ozone = {}
@@ -160,17 +175,19 @@ def app():
                 while i>=(2-len(aqi)):
                     time_list.append((datetime.now(pytz.timezone('Asia/Kolkata')).replace(second=0,minute=0) - timedelta(hours=i)).strftime("%d-%m-%Y %H:%M:%S"))    
                     i-=1
-
+                
                 for i in range(len(time_list)):
                     aqi_time[time_list[i]] = aqi[i]
 
-                    pm25[time_list[i]] = polls[0][i]
-                    pm10[time_list[i]] = polls[1][i]
-                    NO2[time_list[i]] = polls[2][i]
-                    NH3[time_list[i]] = polls[3][i]
-                    SO2[time_list[i]] = polls[4][i]
-                    CO[time_list[i]] = polls[5][i]
-                    Ozone[time_list[i]] = polls[6][i]
+                
+                for i in range(len(polls_ploting_time_list)):
+                    pm25[polls_ploting_time_list[i]] = pollutants_list[0][i]
+                    pm10[polls_ploting_time_list[i]] = pollutants_list[1][i]
+                    NO2[polls_ploting_time_list[i]] = pollutants_list[2][i]
+                    NH3[polls_ploting_time_list[i]] = pollutants_list[3][i]
+                    SO2[polls_ploting_time_list[i]] = pollutants_list[4][i]
+                    CO[polls_ploting_time_list[i]] = pollutants_list[5][i]
+                    Ozone[polls_ploting_time_list[i]] = pollutants_list[6][i]
                     
 
                 ## writting aqi
@@ -234,33 +251,33 @@ def app():
                 ## col1
                 col1.write('#')
                 col1.write('**PM2.5**')
-                col1.bar_chart(pm25)
+                col1.line_chart(pm25)
 
                 col1.write('#')
                 col1.write('**NH3**')
-                col1.bar_chart(NH3)
+                col1.line_chart(NH3)
 
                 col1.write('#')
                 col1.write('**Ozone**')
-                col1.bar_chart(Ozone)
+                col1.line_chart(Ozone)
 
                 ##col2
                 col2.write('#')
                 col2.write('**PM10**')
-                col2.bar_chart(pm10)
+                col2.line_chart(pm10)
 
                 col2.write('#')
                 col2.write('**SO2**')
-                col2.bar_chart(SO2)
+                col2.line_chart(SO2)
 
                 ##col3
                 col3.write('#')
                 col3.write('**NO2**')
-                col3.bar_chart(NO2)
+                col3.line_chart(NO2)
 
                 col3.write('#')
                 col3.write('**CO**')
-                col3.bar_chart(CO)
+                col3.line_chart(CO)
                     
 
 

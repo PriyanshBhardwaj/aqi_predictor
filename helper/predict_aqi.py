@@ -50,15 +50,16 @@ def predict_aqi(input_data, pollutants_data_list):
 
         #creating list of predicted values of each pollutants
         for j in range(len(np.array(preds).tolist()[0])):
+
+            #next 8 hr pollutants values
             polls[j].append(np.array(preds).tolist()[0][j])
+
             # print(np.array(preds).tolist()[0][j])
 
             pollutants_data_list[j] = pollutants_data_list[j][1:]
             pollutants_data_list[j].append(np.array(preds).tolist()[0][j])
-        
+
             hrs_24_avg_pollutants.append(int(np.average(pollutants_data_list[j])))
-        
-        # print(hrs_24_avg_pollutants)
 
         # #calculating aqi from predicted values
         # new_aqi = calculate_AQI(np.array(preds).tolist()[0])
