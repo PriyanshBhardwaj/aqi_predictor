@@ -3,14 +3,29 @@
 import pickle
 import xgboost as xgb
 import numpy as np
+import streamlit as st
 
 
 from .aqi_calculator import calculate_AQI
 # from data_extracter.aqi_ip_sample import create_aqi_input_sample
 
+
+@st.cache_resource(ttl='7 days',show_spinner=False)
+def load_model():
+    model = pickle.load(open('./model/polls_xgb1.pkl', "rb"))
+    return model
+
+
+@st.cache_data(ttl='1d', show_spinner=False)
+def model_predict(_aqi_model, pollutants_24hrs__data):
+    preds = _aqi_model.predict([pollutants_24hrs__data])
+    return preds
+
+
+
 def predict_aqi(input_data, pollutants_data_list):
     #loading the model
-    model = pickle.load(open('./model/polls_xgb1.pkl', "rb"))
+    model = load_model()
     
     #loading the data
     pollutants_24hrs__data = input_data
@@ -24,8 +39,10 @@ def predict_aqi(input_data, pollutants_data_list):
 
     for i in range(8):
         hrs_24_avg_pollutants = []
-        # aqi_value = 0
-        preds = model.predict([pollutants_24hrs__data])
+
+        ##predicting from model
+        preds = model_predict(model, pollutants_24hrs__data)
+
         pollutants_24hrs__data = pollutants_24hrs__data[7:]
         pollutants_24hrs__data+= np.array(preds).tolist()[0]
 
@@ -39,7 +56,7 @@ def predict_aqi(input_data, pollutants_data_list):
             pollutants_data_list[j] = pollutants_data_list[j][1:]
             pollutants_data_list[j].append(np.array(preds).tolist()[0][j])
         
-            hrs_24_avg_pollutants.append(np.average(pollutants_data_list[j]))
+            hrs_24_avg_pollutants.append(int(np.average(pollutants_data_list[j])))
         
         # print(hrs_24_avg_pollutants)
 

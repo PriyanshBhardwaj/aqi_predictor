@@ -8,6 +8,7 @@ import datetime
 import time
 import base64
 from itertools import product
+import streamlit as st
 
 from typing import Dict, List, Union
 
@@ -53,6 +54,15 @@ def __init__():
 
 ##################### main function which will download the data
 
+@st.cache_data(ttl=1200, show_spinner=False)
+def api_call(payload):
+    r = requests.post(
+        'https://airquality.cpcb.gov.in/caaqms/comparision_data',
+        data=payload, headers=headers, verify=True)
+    return r
+
+
+
 def get_data(**kwargs) -> Dict[dict, str]:
     payload = _get_payload(**kwargs)
     # print(request_data(payload))
@@ -61,9 +71,7 @@ def get_data(**kwargs) -> Dict[dict, str]:
 ######## helper functions
 def request_data(payload: str):
     try:
-        r = requests.post(
-            'https://airquality.cpcb.gov.in/caaqms/comparision_data',
-            data=payload, headers=headers, verify=True)
+        r = api_call(payload=payload)
         # print(r.status_code)
         # print(r.text)
         decoded_response = base64.b64decode(r.text)

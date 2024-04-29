@@ -13,6 +13,7 @@ from helper.predict_aqi import predict_aqi
 
 
 
+@st.cache_data(ttl=1200, show_spinner=False)
 def find_aqi(state, city, station_id, station_name):
     ''' main function which will automatically predict the aqi: [curr-1, curr, +1, +2, +3, +4, +5, +6]'''
     # from_date : previous date, time: 1hr before
@@ -24,6 +25,7 @@ def find_aqi(state, city, station_id, station_name):
     # print(from_date, to_date, sep='\n')
 
     try:
+        ## creating aqi input sample
         aqi_input, pollutants_data_list = create_aqi_input_sample(from_date = from_date, to_date = to_date, state = state, city = city, criteria = '1 Hours', station_id = station_id, p_id = ['parameter_193', 'parameter_215', 'parameter_194', 'parameter_311', "parameter_312", "parameter_203", "parameter_222"], parameters = ['PM2.5', 'PM10', 'NO2', 'NH3', 'SO2', 'CO', 'Ozone'], station_name=station_name)
     
     except Exception as e:
@@ -34,6 +36,7 @@ def find_aqi(state, city, station_id, station_name):
 
     # print(aqi_input)
     # print(pollutants_data_list)
+    ## predicting aqi
     predicted_aqi, polls = predict_aqi(aqi_input, pollutants_data_list)
     status = True
 
@@ -44,6 +47,14 @@ def find_aqi(state, city, station_id, station_name):
 
 # find_aqi()
 
+
+
+@st.cache_data(show_spinner=False)          #caching will make it faster
+def read_states_cities_station_csv():
+    state_cities = pd.read_csv('states_cities.csv', converters={'cities': ast.literal_eval})
+    city_stations = pd.read_csv('city_stations.csv', converters={'station_ids':pd.eval,'station_names': ast.literal_eval})
+    
+    return state_cities, city_stations
 
 
 def app():
@@ -87,8 +98,9 @@ def app():
 
     ##user input parameters ====> state, city, station
     col1, col2, col3 = st.columns([1,1,1])
-    state_cities = pd.read_csv('states_cities.csv', converters={'cities': ast.literal_eval})
-    city_stations = pd.read_csv('city_stations.csv', converters={'station_ids':pd.eval,'station_names': ast.literal_eval})
+    
+    ## creating list of states, cities and stations
+    state_cities, city_stations = read_states_cities_station_csv()
 
     #state
     state_list = state_cities['states']   
@@ -131,6 +143,8 @@ def app():
 
         if aqi_button:
             with st.spinner(''):
+
+                ##calling aqi function
                 aqi, status, polls = find_aqi(state, city, station_id, station)
             # print(aqi)
 
@@ -180,7 +194,7 @@ def app():
                 if 301 < aqi[1] < 400:
                     aqi_remark = 'Very poor'
                 if 401 < aqi[1] < 500:
-                    aqi_remark = ':Severe'
+                    aqi_remark = 'Severe'
 
                 col1.write('#')
                 col1.write(f"**AQI Remark: {aqi_remark}**")
